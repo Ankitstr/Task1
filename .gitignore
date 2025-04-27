@@ -15,7 +15,6 @@
 
 # Environment files
 .env
-config.php
 
 # Log files
 *.log
@@ -25,8 +24,7 @@ logs/
 cache/
 *.cache
 
-# Uploaded files
-uploads/
+# Temporary files
 temp/
 
 # Composer
@@ -36,6 +34,16 @@ composer.lock
 # Node modules
 /node_modules/
 package-lock.json
+
+# Keep uploads directory but ignore its contents
+/uploads/*
+!/uploads/products/
+/uploads/products/*
+!/uploads/products/.gitkeep
+
+# Keep config files except sensitive ones
+/config/*
+!/config/database.example.php
 
 # Database files
 *.sql
