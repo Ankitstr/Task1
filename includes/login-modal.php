@@ -1,48 +1,32 @@
 <!-- Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title" id="loginModalLabel">Login to Your Account</h5>
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Login</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div id="loginError" class="alert alert-danger d-none"></div>
-                
-                <form id="loginForm" action="process_login.php" method="POST" class="needs-validation" novalidate>
+                <form id="loginForm" action="auth/process_login.php" method="POST">
                     <div class="mb-3">
-                        <label for="login_email" class="form-label">Email address</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                            <input type="email" class="form-control" id="login_email" name="email" required>
-                            <div class="invalid-feedback">
-                                Please enter your email address.
-                            </div>
-                        </div>
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
-                    
                     <div class="mb-3">
-                        <label for="login_password" class="form-label">Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            <input type="password" class="form-control" id="login_password" name="password" required>
-                            <div class="invalid-feedback">
-                                Please enter your password.
-                            </div>
-                        </div>
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
                     </div>
-                    
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="remember" name="remember">
                         <label class="form-check-label" for="remember">Remember me</label>
                     </div>
-                    
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
-                    
-                    <div class="text-center">
-                        <p class="mb-0">Don't have an account? <a href="#" class="text-primary" id="switchToRegister">Register</a></p>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
                     </div>
                 </form>
+                <div class="text-center mt-3">
+                    <p>Don't have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">Register</a></p>
+                </div>
             </div>
         </div>
     </div>
@@ -130,53 +114,34 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const loginForm = document.getElementById('loginForm');
-        const loginError = document.getElementById('loginError');
         
         if (loginForm) {
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                // Reset error message
-                loginError.classList.add('d-none');
-                loginError.textContent = '';
-                
-                // Validate form
-                if (!this.checkValidity()) {
-                    e.stopPropagation();
-                    this.classList.add('was-validated');
-                    return;
-                }
-                
-                // Submit form via AJAX
                 const formData = new FormData(this);
+                formData.append('redirect_url', sessionStorage.getItem('redirectAfterLogin') || 'index.php');
                 
-                fetch('process_login.php', {
+                fetch(this.action, {
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.text())
+                .then(response => response.json())
                 .then(data => {
-                    try {
-                        const result = JSON.parse(data);
-                        if (result.success) {
-                            // Close modal and reload page
-                            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-                            loginModal.hide();
-                            window.location.reload();
-                        } else {
-                            // Show error message
-                            loginError.textContent = result.message;
-                            loginError.classList.remove('d-none');
-                        }
-                    } catch (e) {
-                        // If response is not JSON, it's a redirect
-                        window.location.href = data;
+                    if (data.success) {
+                        // Close the modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                        modal.hide();
+                        
+                        // Redirect to the stored URL or home page
+                        window.location.href = data.redirect_url || 'index.php';
+                    } else {
+                        alert(data.message || 'Login failed. Please try again.');
                     }
                 })
                 .catch(error => {
-                    loginError.textContent = "An error occurred. Please try again.";
-                    loginError.classList.remove('d-none');
                     console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
                 });
             });
         }
@@ -231,7 +196,6 @@
             // Reset form
             loginForm.reset();
             loginForm.classList.remove('was-validated');
-            loginError.classList.add('d-none');
         });
     });
 </script> 

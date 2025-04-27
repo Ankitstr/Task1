@@ -3,7 +3,7 @@ require_once 'includes/init.php';
 require_once 'config/database.php';
 
 // Check if user is logged in
-
+$isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 
 $database = new Database();
 $db = $database->getConnection();
@@ -170,7 +170,13 @@ if (!empty($_SESSION['cart'])) {
                                 <strong>Total:</strong>
                                 <strong>$<?php echo number_format($total, 2); ?></strong>
                             </div>
-                            <a href="checkout.php" class="btn btn-primary w-100">Proceed to Checkout</a>
+                            <?php if ($isLoggedIn): ?>
+                                <a href="checkout.php" class="btn btn-primary w-100">Proceed to Checkout</a>
+                            <?php else: ?>
+                                <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                    Login to Checkout
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -179,9 +185,16 @@ if (!empty($_SESSION['cart'])) {
     </div>
 
     <?php include 'includes/footer.php'; ?>
+    <?php include 'includes/login-modal.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="assets/js/main.js"></script>
+    <script>
+        // Store the checkout URL in session storage when login modal is shown
+        document.getElementById('loginModal').addEventListener('show.bs.modal', function () {
+            sessionStorage.setItem('redirectAfterLogin', 'checkout.php');
+        });
+    </script>
 </body>
 </html> 
