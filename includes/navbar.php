@@ -22,9 +22,9 @@ $stmt->execute();
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!-- Add Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Add jQuery first, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
 .navbar {
@@ -365,9 +365,26 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script>
 // Initialize all dropdowns
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all dropdowns
     var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-    var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
-        return new bootstrap.Dropdown(dropdownToggleEl);
+    dropdownElementList.forEach(function(dropdownToggleEl) {
+        new bootstrap.Dropdown(dropdownToggleEl, {
+            offset: 10,
+            popperConfig: function(popperConfig) {
+                return {
+                    ...popperConfig,
+                    modifiers: [
+                        ...popperConfig.modifiers,
+                        {
+                            name: 'preventOverflow',
+                            options: {
+                                boundary: 'viewport'
+                            }
+                        }
+                    ]
+                };
+            }
+        });
     });
 
     // Initialize modals
